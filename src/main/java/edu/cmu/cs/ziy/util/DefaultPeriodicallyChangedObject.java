@@ -1,12 +1,15 @@
 package edu.cmu.cs.ziy.util;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 
-public class DefaultPeriodicallyChangedObject<T> implements PeriodicallyChanged<T> {
+public class DefaultPeriodicallyChangedObject<T> implements PeriodicallyChanged<T>, Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   protected RangeMap<Calendar, T> period2value = TreeRangeMap.create();
 

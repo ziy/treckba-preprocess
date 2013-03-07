@@ -1,12 +1,15 @@
 package edu.cmu.cs.ziy.util;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 
-public class DefaultPeriodicallyValidObject implements PeriodicallyValid {
+public class DefaultPeriodicallyValidObject implements PeriodicallyValid, Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   protected RangeSet<Calendar> periods = TreeRangeSet.create();
 
@@ -53,5 +56,5 @@ public class DefaultPeriodicallyValidObject implements PeriodicallyValid {
       return false;
     return true;
   }
-  
+
 }
