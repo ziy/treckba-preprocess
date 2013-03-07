@@ -25,7 +25,10 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.zip.GZIPInputStream;
+
 import javax.security.auth.login.*;
+
+import com.google.common.collect.Lists;
 
 /**
  * This is a somewhat sketchy bot framework for editing MediaWiki wikis. Requires JDK 1.6 (6.0) or
@@ -2347,6 +2350,18 @@ public class Wiki implements Serializable {
             "Successfully retrieved page history of " + title + " (" + size + " revisions)",
             "getPageHistory");
     return revisions.toArray(new Revision[size]);
+  }
+
+  public List<Revision> getPageHistoryWithInitialVersion(String title, Calendar start, Calendar end)
+          throws IOException {
+    // get all versions revised during the time span
+    List<Revision> revisions = Lists.newArrayList(getPageHistory(title, start, end));
+    // get the version at the beginning of the period
+    Revision[] pastRevisions = getPageHistory(title, end, null);
+    if (pastRevisions != null && pastRevisions.length > 0) {
+      revisions.add(pastRevisions[0]);
+    }
+    return revisions;
   }
 
   /**
