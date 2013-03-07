@@ -1,5 +1,6 @@
-package edu.cmu.cs.ziy.courses.expir.treckba.topics;
+package edu.cmu.cs.ziy.wiki;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 import com.google.common.collect.Range;
@@ -9,7 +10,9 @@ import com.google.common.collect.TreeRangeSet;
 import edu.cmu.cs.ziy.util.CalendarUtils;
 import edu.cmu.cs.ziy.util.DefaultPeriodicallyValidObject;
 
-public class WikipediaEntity extends DefaultPeriodicallyValidObject {
+public class WikipediaEntity extends DefaultPeriodicallyValidObject implements Serializable {
+
+  private static final long serialVersionUID = -820448988712462721L;
 
   public static enum Relation {
     ORIGINAL, REDIRECT, CATEGORY, INLINK, OUTLINK
@@ -53,6 +56,11 @@ public class WikipediaEntity extends DefaultPeriodicallyValidObject {
     RangeSet<Calendar> periods = TreeRangeSet.create();
     periods.add(Range.closed(CalendarUtils.BIG_BANG, deletionTime));
     return new WikipediaEntity(text, relation, periods);
+  }
+
+  @Override
+  public String toString() {
+    return "[" + relation + "]" + text + ":" + periods;
   }
 
   @Override

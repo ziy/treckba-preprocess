@@ -1,5 +1,7 @@
 package edu.cmu.cs.ziy.courses.expir.treckba.topics;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -20,18 +22,19 @@ import com.google.common.collect.Sets.SetView;
 import com.google.common.collect.TreeRangeSet;
 
 import edu.cmu.cs.ziy.util.CalendarUtils;
+import edu.cmu.cs.ziy.wiki.ExpandedWikipediaArticle;
+import edu.cmu.cs.ziy.wiki.WikipediaArticle;
+import edu.cmu.cs.ziy.wiki.WikipediaArticleCache;
+import edu.cmu.cs.ziy.wiki.WikipediaEntity;
+import edu.cmu.cs.ziy.wiki.WikipediaNamespacePredicate;
 
 public class WikipediaKeytermExpander {
 
   private Wiki wiki;
 
-  private String version;
-
   private Calendar earliestTime;
 
   private Calendar latestTime;
-
-  private String dateFormatPattern;
 
   public WikipediaKeytermExpander(String domain, int throttle, String earliestTimeStr,
           String latestTimeStr, String dateFormatPattern) throws FailedLoginException, IOException,
@@ -40,13 +43,12 @@ public class WikipediaKeytermExpander {
     this.wiki.setThrottle(throttle);
     this.earliestTime = CalendarUtils.getGmtInstance(earliestTimeStr, dateFormatPattern);
     this.latestTime = CalendarUtils.getGmtInstance(latestTimeStr, dateFormatPattern);
-    this.dateFormatPattern = dateFormatPattern;
   }
 
   public ExpandedWikipediaArticle expandKeyterm(String topicName) throws IOException,
           ParseException {
-    ExpandedWikipediaArticle article = ExpandedWikipediaArticle.newPeriodicalArticle(topicName,
-            latestTime, earliestTime, wiki);
+    ExpandedWikipediaArticle article = WikipediaArticleCache.loadExpandedArticle(topicName,
+            Range.closedOpen(earliestTime, latestTime), wiki);
 
     // redirects
     HashSet<String> redirects = Sets.newHashSet(wiki.whatLinksHere(topicName, true,
@@ -54,7 +56,7 @@ public class WikipediaKeytermExpander {
     for (String redirect : redirects) {
       List<Revision> redirectRevisions = wiki.getPageHistoryWithInitialVersion(redirect,
               latestTime, earliestTime);
-      assert redirectRevisions.size() == 1;
+      // assert redirectRevisions.size() == 1;
       RangeSet<Calendar> periods = TreeRangeSet.create();
       periods.add(Range.closedOpen(redirectRevisions.get(0).getTimestamp(), CalendarUtils.PRESENT));
       article.addRelatedEntity(new WikipediaEntity(redirect, WikipediaEntity.Relation.REDIRECT,
@@ -65,8 +67,8 @@ public class WikipediaKeytermExpander {
     HashSet<String> inlinks = Sets.newHashSet(wiki.whatLinksHere(topicName, Wiki.MAIN_NAMESPACE));
     SetView<String> nonRedirectsInlinks = Sets.difference(inlinks, redirects);
     for (String inlink : nonRedirectsInlinks) {
-      WikipediaArticle related = WikipediaArticle.newPeriodicalArticle(inlink, latestTime,
-              earliestTime, wiki);
+      WikipediaArticle related = WikipediaArticleCache.loadArticle(inlink,
+              Range.closedOpen(earliestTime, latestTime), wiki);
       RangeSet<Calendar> periods = TreeRangeSet.create();
       for (Entry<Range<Calendar>, String> revision : related.getPeriodicContent().asMapOfRanges()
               .entrySet()) {
@@ -110,6 +112,8 @@ public class WikipediaKeytermExpander {
               periods));
     }
 
+    System.out.println(article.getRelatedEntities());
+
     return article;
   }
 
@@ -125,24 +129,22 @@ public class WikipediaKeytermExpander {
     String earliestTimeStr = "2011-10-07-14";
     String latestTimeStr = "2012-05-02-00";
     String dateFormatPattern = "yyyy-MM-dd-HH";
-    String cacheFilePath = "data/wikipedia-articles.cache";
+    String cacheFilePath = "src/main/resources/data/wikipedia-articles.cache";
+    WikipediaArticleCache.loadCache(cacheFilePath);
 
-    String topicName = "William_D._Cohan";
+    // String topicName = "William_D._Cohan";
     WikipediaKeytermExpander wke = new WikipediaKeytermExpander(domain, throttle, earliestTimeStr,
             latestTimeStr, dateFormatPattern);
-    WikipediaArticle.loadCache(cacheFilePath);
-    if (!WikipediaArticle.cache.containsKey(topicName)) {
-      WikipediaArticle.cache.put(topicName, wke.expandKeyterm(topicName));
-    }
-    WikipediaArticle.writeCache(cacheFilePath);
-
-    // String jsonPath =
-    // "data/trec-kba-ccr-2012-scorer-and-full-annotation/trec-kba-ccr-2012.filter-topics.json";
-    // BufferedReader jsonReader = new BufferedReader(new FileReader(jsonPath));
-    // TrecKbaTopics topics = TrecKbaTopics.readTrecKbaTopics(jsonReader);
-    // jsonReader.close();
-    // for (String topicName : topics.getTopicNames()) {
     // wke.expandKeyterm(topicName);
-    // }
+
+    String jsonPath = "data/trec-kba-ccr-2012-scorer-and-full-annotation/trec-kba-ccr-2012.filter-topics.json";
+    BufferedReader jsonReader = new BufferedReader(new FileReader(jsonPath));
+    TrecKbaTopics topics = TrecKbaTopics.readTrecKbaTopics(jsonReader);
+    jsonReader.close();
+    for (String topicName : topics.getTopicNames()) {
+      wke.expandKeyterm(topicName);
+    }
+
+    WikipediaArticleCache.writeCache(cacheFilePath);
   }
 }

@@ -1,26 +1,20 @@
-package edu.cmu.cs.ziy.courses.expir.treckba.topics;
+package edu.cmu.cs.ziy.wiki;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Map;
 
 import org.wikipedia.Wiki;
 import org.wikipedia.Wiki.Revision;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 
-import edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaEntity.Relation;
 import edu.cmu.cs.ziy.util.CalendarUtils;
 import edu.cmu.cs.ziy.util.DefaultPeriodicallyChangedObject;
 import edu.cmu.cs.ziy.util.GuavaUtils;
+import edu.cmu.cs.ziy.wiki.WikipediaEntity.Relation;
 
 public class WikipediaArticle extends DefaultPeriodicallyChangedObject<String> implements
         Serializable {
@@ -28,25 +22,6 @@ public class WikipediaArticle extends DefaultPeriodicallyChangedObject<String> i
   private static final long serialVersionUID = 1L;
 
   protected WikipediaEntity entity;
-
-  public static Map<String, WikipediaArticle> cache = Maps.newHashMap();
-
-  @SuppressWarnings("unchecked")
-  public static void loadCache(String inputFilePath) throws IOException, ClassNotFoundException {
-    try {
-      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputFilePath));
-      cache = (Map<String, WikipediaArticle>) ois.readObject();
-      ois.close();
-    } catch (FileNotFoundException e) {
-      return;
-    }
-  }
-
-  public static void writeCache(String outputFilePath) throws IOException {
-    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outputFilePath));
-    oos.writeObject(cache);
-    oos.close();
-  }
 
   protected WikipediaArticle(String title) {
     super();
@@ -65,8 +40,13 @@ public class WikipediaArticle extends DefaultPeriodicallyChangedObject<String> i
     WikipediaArticle article = new WikipediaArticle(title);
     Calendar endTime = CalendarUtils.PRESENT;
     for (Revision revision : wiki.getPageHistoryWithInitialVersion(title, latest, earliest)) {
-      article.addPeriodicContent(Range.closedOpen(revision.getTimestamp(), endTime),
-              revision.getText());
+      // http://en.wikipedia.org/w/index.php?maxlag=5&title=Israel+and+the+apartheid+analogy&oldid=462866082&action=raw
+      try {
+        String text = revision.getText();
+        article.addPeriodicContent(Range.closedOpen(revision.getTimestamp(), endTime), text);
+      } catch (FileNotFoundException e) {
+        System.err.println(e.getMessage());
+      }
       endTime = revision.getTimestamp();
     }
     return article;

@@ -1,4 +1,4 @@
-package edu.cmu.cs.ziy.courses.expir.treckba.topics;
+package edu.cmu.cs.ziy.wiki;
 
 import java.io.IOException;
 
