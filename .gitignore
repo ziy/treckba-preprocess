@@ -6,3 +6,5 @@
 *.ear
 /data
 /target
+/pom.xml.gwtwiki
+/pom.xml.jwpl

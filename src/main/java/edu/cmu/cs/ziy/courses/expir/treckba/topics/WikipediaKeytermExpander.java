@@ -8,12 +8,15 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.FailedLoginException;
 
 import org.wikipedia.Wiki;
 import org.wikipedia.Wiki.Revision;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -47,6 +50,7 @@ public class WikipediaKeytermExpander {
 
   public ExpandedWikipediaArticle expandKeyterm(String topicName) throws IOException,
           ParseException {
+    // System.out.println(topicName);
     ExpandedWikipediaArticle article = WikipediaArticleCache.loadExpandedArticle(topicName,
             Range.closedOpen(earliestTime, latestTime), wiki);
 
@@ -57,6 +61,9 @@ public class WikipediaKeytermExpander {
       List<Revision> redirectRevisions = wiki.getPageHistoryWithInitialVersion(redirect,
               latestTime, earliestTime);
       // assert redirectRevisions.size() == 1;
+      if (redirectRevisions.size() < 1) {
+        continue;
+      }
       RangeSet<Calendar> periods = TreeRangeSet.create();
       periods.add(Range.closedOpen(redirectRevisions.get(0).getTimestamp(), CalendarUtils.PRESENT));
       article.addRelatedEntity(new WikipediaEntity(redirect, WikipediaEntity.Relation.REDIRECT,
@@ -112,7 +119,23 @@ public class WikipediaKeytermExpander {
               periods));
     }
 
-    System.out.println(article.getRelatedEntities());
+    System.out.println(topicName
+            + "\t"
+            + article.getPeriodicContent().asMapOfRanges().size()
+            + "\t"
+            + Sets.filter(article.getRelatedEntities(),
+                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.CATEGORY))
+                    .size()
+            + "\t"
+            + Sets.filter(article.getRelatedEntities(),
+                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.OUTLINK)).size()
+            + "\t"
+            + Sets.filter(article.getRelatedEntities(),
+                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.REDIRECT))
+                    .size()
+            + "\t"
+            + Sets.filter(article.getRelatedEntities(),
+                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.INLINK)).size());
 
     return article;
   }
@@ -124,6 +147,7 @@ public class WikipediaKeytermExpander {
 
   public static void main(String[] args) throws IOException, FailedLoginException, ParseException,
           ClassNotFoundException {
+    Logger.getLogger("wiki").setLevel(Level.SEVERE);
     String domain = "en.wikipedia.org";
     int throttle = 5000;
     String earliestTimeStr = "2011-10-07-14";

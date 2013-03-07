@@ -3,6 +3,7 @@ package edu.cmu.cs.ziy.wiki;
 import java.io.Serializable;
 import java.util.Calendar;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -58,6 +59,21 @@ public class WikipediaEntity extends DefaultPeriodicallyValidObject implements S
     return new WikipediaEntity(text, relation, periods);
   }
 
+  public static class RelationPredicate implements Predicate<WikipediaEntity> {
+
+    private Relation relation;
+
+    public RelationPredicate(Relation relation) {
+      this.relation = relation;
+    }
+    
+    @Override
+    public boolean apply(WikipediaEntity input) {
+      return input.relation.equals(relation);
+    }
+    
+  }
+  
   @Override
   public String toString() {
     return "[" + relation + "]" + text + ":" + periods;
@@ -89,6 +105,14 @@ public class WikipediaEntity extends DefaultPeriodicallyValidObject implements S
     } else if (!text.equals(other.text))
       return false;
     return true;
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public Relation getRelation() {
+    return relation;
   }
 
 }

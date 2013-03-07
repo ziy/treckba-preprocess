@@ -116,6 +116,22 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaKeytermExpander</mainClass>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
