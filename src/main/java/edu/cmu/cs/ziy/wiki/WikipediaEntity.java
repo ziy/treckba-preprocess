@@ -15,6 +15,9 @@ public class WikipediaEntity extends DefaultPeriodicallyValidObject implements S
 
   private static final long serialVersionUID = -820448988712462721L;
 
+  // TODO Create subclasses for each relation, and force validity check while the entity is created.
+  // TODO Category them into two super classes: REDIRECT, INLINK -> External, CATEGORY, OUTLINK,
+  // BOLD TEXT -> Internal
   public static enum Relation {
     ORIGINAL, REDIRECT, CATEGORY, INLINK, OUTLINK
   };
@@ -66,14 +69,14 @@ public class WikipediaEntity extends DefaultPeriodicallyValidObject implements S
     public RelationPredicate(Relation relation) {
       this.relation = relation;
     }
-    
+
     @Override
     public boolean apply(WikipediaEntity input) {
       return input.relation.equals(relation);
     }
-    
+
   }
-  
+
   @Override
   public String toString() {
     return "[" + relation + "]" + text + ":" + periods;

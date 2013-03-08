@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Calendar;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.wikipedia.Wiki;
 
@@ -23,7 +25,8 @@ public class WikipediaArticleCache {
   @SuppressWarnings("unchecked")
   public static void loadCache(String inputFilePath) throws IOException, ClassNotFoundException {
     try {
-      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputFilePath));
+      ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new FileInputStream(
+              inputFilePath)));
       articleCache = (Table<String, Range<Calendar>, WikipediaArticle>) ois.readObject();
       expandedArticleCache = (Table<String, Range<Calendar>, ExpandedWikipediaArticle>) ois
               .readObject();
@@ -35,7 +38,8 @@ public class WikipediaArticleCache {
   }
 
   public static void writeCache(String outputFilePath) throws IOException {
-    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outputFilePath));
+    ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(
+            outputFilePath)));
     oos.writeObject(articleCache);
     oos.writeObject(expandedArticleCache);
     oos.close();

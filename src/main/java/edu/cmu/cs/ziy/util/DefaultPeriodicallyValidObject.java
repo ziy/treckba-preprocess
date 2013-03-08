@@ -1,7 +1,11 @@
 package edu.cmu.cs.ziy.util;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Set;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -11,10 +15,11 @@ public class DefaultPeriodicallyValidObject implements PeriodicallyValid, Serial
 
   private static final long serialVersionUID = 1L;
 
-  protected RangeSet<Calendar> periods = TreeRangeSet.create();
+  protected RangeSet<Calendar> periods;
 
   public DefaultPeriodicallyValidObject() {
     super();
+    this.periods = TreeRangeSet.create();
   }
 
   public DefaultPeriodicallyValidObject(RangeSet<Calendar> periods) {
@@ -30,6 +35,23 @@ public class DefaultPeriodicallyValidObject implements PeriodicallyValid, Serial
   @Override
   public boolean isValidAt(Calendar time) {
     return periods.contains(time);
+  }
+
+  private void writeObject(ObjectOutputStream out) throws IOException {
+    Set<Range<Calendar>> ranges = periods.asRanges();
+    out.writeInt(ranges.size());
+    for (Range<Calendar> range : ranges) {
+      out.writeObject(range);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+    periods = TreeRangeSet.create();
+    int size = in.readInt();
+    for (int i = 0; i < size; i++) {
+      periods.add((Range<Calendar>) in.readObject());
+    }
   }
 
   @Override

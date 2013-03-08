@@ -1,20 +1,27 @@
 package edu.cmu.cs.ziy.util;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 
-public class DefaultPeriodicallyChangedObject<T> implements PeriodicallyChanged<T>, Serializable {
+public class DefaultPeriodicallyChangedObject<T extends Serializable> implements
+        PeriodicallyChanged<T>, Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  protected RangeMap<Calendar, T> period2value = TreeRangeMap.create();
+  protected RangeMap<Calendar, T> period2value;
 
   public DefaultPeriodicallyChangedObject() {
     super();
+    this.period2value = TreeRangeMap.create();
   }
 
   public DefaultPeriodicallyChangedObject(RangeMap<Calendar, T> period2value) {
@@ -25,12 +32,31 @@ public class DefaultPeriodicallyChangedObject<T> implements PeriodicallyChanged<
   @Override
   public void addValuePeriod(Range<Calendar> period, T value) {
     period2value.put(period, value);
-
   }
 
   @Override
   public T getValueAt(Calendar time) {
     return period2value.get(time);
+  }
+
+  private void writeObject(ObjectOutputStream out) throws IOException {
+    Map<Range<Calendar>, T> pairs = period2value.asMapOfRanges();
+    out.writeInt(pairs.size());
+    for (Entry<Range<Calendar>, T> pair : pairs.entrySet()) {
+      out.writeObject(pair.getKey());
+      out.writeObject(pair.getValue());
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+    period2value = TreeRangeMap.create();
+    int size = in.readInt();
+    for (int i = 0; i < size; i++) {
+      Range<Calendar> key = (Range<Calendar>) in.readObject();
+      T value = (T) in.readObject();
+      period2value.put(key, value);
+    }
   }
 
   @Override

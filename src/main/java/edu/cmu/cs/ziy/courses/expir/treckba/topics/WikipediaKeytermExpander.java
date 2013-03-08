@@ -59,6 +59,10 @@ public class WikipediaKeytermExpander {
     for (String redirect : redirects) {
       List<Revision> redirectRevisions = wiki.getPageHistoryWithInitialVersion(redirect,
               latestTime, earliestTime);
+      // TODO Check the reasons why multiple revisions are available for redirects, and why
+      // sometimes no revision.
+      // TODO Create WikipediaArticle for redirects (actually all the External expanded terms, e.g.
+      // INLINK).
       // assert redirectRevisions.size() == 1;
       if (redirectRevisions.size() < 1) {
         continue;
@@ -119,20 +123,20 @@ public class WikipediaKeytermExpander {
     }
 
     System.out.println(topicName
-            + "\t"
+            + "\n"
             + article.getPeriodicContent().asMapOfRanges().size()
-            + "\t"
+            + "\n"
             + Sets.filter(article.getRelatedEntities(),
                     new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.CATEGORY))
                     .size()
-            + "\t"
+            + "\n"
             + Sets.filter(article.getRelatedEntities(),
                     new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.OUTLINK)).size()
-            + "\t"
+            + "\n"
             + Sets.filter(article.getRelatedEntities(),
                     new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.REDIRECT))
                     .size()
-            + "\t"
+            + "\n"
             + Sets.filter(article.getRelatedEntities(),
                     new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.INLINK)).size());
 
@@ -146,7 +150,7 @@ public class WikipediaKeytermExpander {
 
   public static void main(String[] args) throws IOException, FailedLoginException, ParseException,
           ClassNotFoundException {
-    Logger.getLogger("wiki").setLevel(Level.SEVERE);
+    // Logger.getLogger("wiki").setLevel(Level.SEVERE);
     String domain = "en.wikipedia.org";
     int throttle = 5000;
     String earliestTimeStr = "2011-10-07-14";
@@ -155,19 +159,18 @@ public class WikipediaKeytermExpander {
     String cacheFilePath = "src/main/resources/data/wikipedia-articles.cache";
     WikipediaArticleCache.loadCache(cacheFilePath);
 
-    // String topicName = "William_D._Cohan";
+    String topicName = "William_D._Cohan";
     WikipediaKeytermExpander wke = new WikipediaKeytermExpander(domain, throttle, earliestTimeStr,
             latestTimeStr, dateFormatPattern);
-    // wke.expandKeyterm(topicName);
+    wke.expandKeyterm(topicName);
 
-    String jsonPath = "data/trec-kba-ccr-2012-scorer-and-full-annotation/trec-kba-ccr-2012.filter-topics.json";
-    BufferedReader jsonReader = new BufferedReader(new FileReader(jsonPath));
-    TrecKbaTopics topics = TrecKbaTopics.readTrecKbaTopics(jsonReader);
-    jsonReader.close();
-    for (String topicName : topics.getTopicNames()) {
-      wke.expandKeyterm(topicName);
-    }
-
+    /*
+     * String jsonPath =
+     * "data/trec-kba-ccr-2012-scorer-and-full-annotation/trec-kba-ccr-2012.filter-topics.json";
+     * BufferedReader jsonReader = new BufferedReader(new FileReader(jsonPath)); TrecKbaTopics
+     * topics = TrecKbaTopics.readTrecKbaTopics(jsonReader); jsonReader.close(); for (String
+     * topicName : topics.getTopicNames()) { wke.expandKeyterm(topicName); }
+     */
     WikipediaArticleCache.writeCache(cacheFilePath);
   }
 }
