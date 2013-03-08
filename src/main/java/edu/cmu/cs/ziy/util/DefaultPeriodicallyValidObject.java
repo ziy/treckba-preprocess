@@ -55,6 +55,11 @@ public class DefaultPeriodicallyValidObject implements PeriodicallyValid, Serial
   }
 
   @Override
+  public String toString() {
+    return CalendarUtils.rangeSetToString(this.periods, CalendarUtils.YMDH_FORMAT);
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

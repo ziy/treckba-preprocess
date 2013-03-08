@@ -79,7 +79,7 @@ public class WikipediaEntity extends DefaultPeriodicallyValidObject implements S
 
   @Override
   public String toString() {
-    return "[" + relation + "]" + text + ":" + periods;
+    return "[" + relation + "]" + text + ":" + super.toString();
   }
 
   @Override

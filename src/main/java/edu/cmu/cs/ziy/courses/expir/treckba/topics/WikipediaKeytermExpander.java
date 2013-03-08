@@ -122,23 +122,8 @@ public class WikipediaKeytermExpander {
               periods));
     }
 
-    System.out.println(topicName
-            + "\n"
-            + article.getPeriodicContent().asMapOfRanges().size()
-            + "\n"
-            + Sets.filter(article.getRelatedEntities(),
-                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.CATEGORY))
-                    .size()
-            + "\n"
-            + Sets.filter(article.getRelatedEntities(),
-                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.OUTLINK)).size()
-            + "\n"
-            + Sets.filter(article.getRelatedEntities(),
-                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.REDIRECT))
-                    .size()
-            + "\n"
-            + Sets.filter(article.getRelatedEntities(),
-                    new WikipediaEntity.RelationPredicate(WikipediaEntity.Relation.INLINK)).size());
+    System.out.println(article.getSizeSummary());
+    System.out.println(article.getRelatedEntities());
 
     return article;
   }

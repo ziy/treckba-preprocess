@@ -25,14 +25,13 @@ public class WikipediaArticle extends DefaultPeriodicallyChangedObject<String> i
 
   protected WikipediaArticle(String title) {
     super();
-    this.entity = WikipediaEntity.getPresentInstance(title, Relation.ORIGINAL,
-            CalendarUtils.BIG_BANG);
+    this.entity = WikipediaEntity.getInvalidInstance(title, Relation.ORIGINAL);
   }
 
   protected WikipediaArticle(String title, RangeMap<Calendar, String> period2content) {
     super(period2content);
     this.entity = new WikipediaEntity(title, Relation.ORIGINAL,
-            GuavaUtils.toRangeSet(period2content));
+            GuavaUtils.keySet(period2content));
   }
 
   public static WikipediaArticle newPeriodicalArticle(String title, Calendar latest,

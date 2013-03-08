@@ -7,7 +7,7 @@ import com.google.common.collect.TreeRangeSet;
 
 public class GuavaUtils {
 
-  public static <T extends Comparable<T>> RangeSet<T> toRangeSet(RangeMap<T, ?> map) {
+  public static <T extends Comparable<T>> RangeSet<T> keySet(RangeMap<T, ?> map) {
     RangeSet<T> set = TreeRangeSet.create();
     for (Range<T> key : map.asMapOfRanges().keySet()) {
       set.add(key);
