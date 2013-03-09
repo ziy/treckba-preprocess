@@ -31,6 +31,11 @@ public class DefaultPeriodicallyValidObject implements PeriodicallyValid, Serial
   public void addValidPeriod(Range<Calendar> period) {
     periods.add(period);
   }
+  
+  @Override
+  public void addValidPeriods(RangeSet<Calendar> periods) {
+    periods.addAll(periods);
+  }
 
   @Override
   public boolean isValidAt(Calendar time) {

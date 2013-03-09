@@ -24,11 +24,11 @@ import com.google.common.collect.Sets.SetView;
 import com.google.common.collect.TreeRangeSet;
 
 import edu.cmu.cs.ziy.util.CalendarUtils;
-import edu.cmu.cs.ziy.wiki.ExpandedWikipediaArticle;
-import edu.cmu.cs.ziy.wiki.WikipediaArticle;
-import edu.cmu.cs.ziy.wiki.WikipediaArticleCache;
-import edu.cmu.cs.ziy.wiki.WikipediaEntity;
 import edu.cmu.cs.ziy.wiki.WikipediaNamespacePredicate;
+import edu.cmu.cs.ziy.wiki.article.ExpandedWikipediaArticle;
+import edu.cmu.cs.ziy.wiki.article.WikipediaArticle;
+import edu.cmu.cs.ziy.wiki.article.WikipediaArticleCache;
+import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
 
 public class WikipediaKeytermExpander {
 
@@ -38,6 +38,8 @@ public class WikipediaKeytermExpander {
 
   private Calendar latestTime;
 
+  private WikipediaEntityExpander[] expanders;
+
   public WikipediaKeytermExpander(String domain, int throttle, String earliestTimeStr,
           String latestTimeStr, String dateFormatPattern) throws FailedLoginException, IOException,
           ParseException {
@@ -45,6 +47,8 @@ public class WikipediaKeytermExpander {
     this.wiki.setThrottle(throttle);
     this.earliestTime = CalendarUtils.getGmtInstance(earliestTimeStr, dateFormatPattern);
     this.latestTime = CalendarUtils.getGmtInstance(latestTimeStr, dateFormatPattern);
+    this.expanders = new WikipediaEntityExpander[] { new CategoryEntityExpander(),
+        new OutlinkEntityExpander(), new InlinkEntityExpander(), new RedirectEntityExpander() };
   }
 
   public ExpandedWikipediaArticle expandKeyterm(String topicName) throws IOException,
@@ -53,84 +57,14 @@ public class WikipediaKeytermExpander {
     ExpandedWikipediaArticle article = WikipediaArticleCache.loadExpandedArticle(topicName,
             Range.closedOpen(earliestTime, latestTime), wiki);
 
-    // redirects
-    HashSet<String> redirects = Sets.newHashSet(wiki.whatLinksHere(topicName, true,
-            Wiki.MAIN_NAMESPACE));
-    for (String redirect : redirects) {
-      List<Revision> redirectRevisions = wiki.getPageHistoryWithInitialVersion(redirect,
-              latestTime, earliestTime);
-      // TODO Check the reasons why multiple revisions are available for redirects, and why
-      // sometimes no revision.
-      // TODO Create WikipediaArticle for redirects (actually all the External expanded terms, e.g.
-      // INLINK).
-      // assert redirectRevisions.size() == 1;
-      if (redirectRevisions.size() < 1) {
-        continue;
-      }
-      RangeSet<Calendar> periods = TreeRangeSet.create();
-      periods.add(Range.closedOpen(redirectRevisions.get(0).getTimestamp(), CalendarUtils.PRESENT));
-      article.addRelatedEntity(new WikipediaEntity(redirect, WikipediaEntity.Relation.REDIRECT,
-              periods));
+    for (WikipediaEntityExpander expander : expanders) {
+      expander.generateEntities(topicName, wiki);
     }
-
-    // inlinks
-    HashSet<String> inlinks = Sets.newHashSet(wiki.whatLinksHere(topicName, Wiki.MAIN_NAMESPACE));
-    SetView<String> nonRedirectsInlinks = Sets.difference(inlinks, redirects);
-    for (String inlink : nonRedirectsInlinks) {
-      WikipediaArticle related = WikipediaArticleCache.loadArticle(inlink,
-              Range.closedOpen(earliestTime, latestTime), wiki);
-      RangeSet<Calendar> periods = TreeRangeSet.create();
-      for (Entry<Range<Calendar>, String> revision : related.getPeriodicContent().asMapOfRanges()
-              .entrySet()) {
-        if (containsLink(revision.getValue(), inlink)) {
-          periods.add(Range.closedOpen(revision.getKey().lowerEndpoint(), revision.getKey()
-                  .lowerEndpoint()));
-        }
-      }
-      article.addRelatedEntity(new WikipediaEntity(inlink, WikipediaEntity.Relation.INLINK, periods));
-    }
-
-    // categories
-    HashSet<String> categories = Sets.newHashSet(wiki.getCategories(topicName));
-    for (String category : categories) {
-      RangeSet<Calendar> periods = TreeRangeSet.create();
-      for (Entry<Range<Calendar>, String> revision : article.getPeriodicContent().asMapOfRanges()
-              .entrySet()) {
-        if (containsLink(revision.getValue(), topicName)) {
-          periods.add(Range.closedOpen(revision.getKey().lowerEndpoint(), revision.getKey()
-                  .upperEndpoint()));
-        }
-      }
-      article.addRelatedEntity(new WikipediaEntity(category, WikipediaEntity.Relation.CATEGORY,
-              periods));
-    }
-
-    // outlinks
-    HashSet<String> outlinks = Sets.newHashSet(wiki.getLinksOnPage(topicName));
-    HashSet<String> mainNsOutlinks = Sets.newHashSet(Collections2.filter(outlinks,
-            new WikipediaNamespacePredicate(wiki, Wiki.MAIN_NAMESPACE)));
-    for (String outlink : mainNsOutlinks) {
-      RangeSet<Calendar> periods = TreeRangeSet.create();
-      for (Entry<Range<Calendar>, String> revision : article.getPeriodicContent().asMapOfRanges()
-              .entrySet()) {
-        if (containsLink(revision.getValue(), topicName)) {
-          periods.add(Range.closedOpen(revision.getKey().lowerEndpoint(), revision.getKey()
-                  .upperEndpoint()));
-        }
-      }
-      article.addRelatedEntity(new WikipediaEntity(outlink, WikipediaEntity.Relation.OUTLINK,
-              periods));
-    }
-
+    
     System.out.println(article.getSizeSummary());
     System.out.println(article.getRelatedEntities());
 
     return article;
-  }
-
-  private boolean containsLink(String text, String topicName) {
-    String regex = ".*\\[{2}" + topicName + "(?:\\]{2}|\\|).*";
-    return text.matches(regex);
   }
 
   public static void main(String[] args) throws IOException, FailedLoginException, ParseException,
