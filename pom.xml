@@ -129,7 +129,7 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaKeytermExpander</mainClass>
+          <mainClass>edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaKeytermExpanderAggregator</mainClass>
         </configuration>
       </plugin>
     </plugins>

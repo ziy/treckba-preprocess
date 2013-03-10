@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Calendar;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -18,7 +17,6 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Table;
 
 import edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaEntityExpander;
-import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
 
 public class WikipediaArticleCache {
 
@@ -62,7 +60,7 @@ public class WikipediaArticleCache {
     return article;
   }
 
-  // TODO Need to include expanded keyterms
+  // DONE Need to include expanded keyterms
   public static ExpandedWikipediaArticle loadExpandedArticle(String title, Range<Calendar> period,
           WikipediaEntityExpander[] expanders, Wiki wiki) throws IOException {
     ExpandedWikipediaArticle expandedArticle;
