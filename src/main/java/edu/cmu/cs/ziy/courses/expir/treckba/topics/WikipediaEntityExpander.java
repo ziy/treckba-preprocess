@@ -17,4 +17,8 @@ public interface WikipediaEntityExpander {
 
   RangeSet<Calendar> validateExistence(String originalEntity, String expandedEntity,
           Range<Calendar> period, Wiki wiki) throws IOException;
+
+  Set<WikipediaEntity> generateAndValidateExistence(String originalEntity, Range<Calendar> period,
+          Wiki wiki) throws IOException;
+
 }

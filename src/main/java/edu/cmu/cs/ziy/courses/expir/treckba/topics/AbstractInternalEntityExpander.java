@@ -15,7 +15,7 @@ import edu.cmu.cs.ziy.wiki.article.WikipediaArticle;
 import edu.cmu.cs.ziy.wiki.article.WikipediaArticleCache;
 import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
 
-public abstract class AbstractInternalEntityExpander extends AbstractWikipediaEntityExpanderImpl
+public abstract class AbstractInternalEntityExpander extends AbstractWikipediaEntityExpander
         implements WikipediaEntityExpander {
 
   @Override

@@ -29,17 +29,21 @@ public class DefaultPeriodicallyValidObject implements PeriodicallyValid, Serial
 
   @Override
   public void addValidPeriod(Range<Calendar> period) {
-    periods.add(period);
+    this.periods.add(period);
   }
   
   @Override
   public void addValidPeriods(RangeSet<Calendar> periods) {
-    periods.addAll(periods);
+    this.periods.addAll(periods);
   }
 
   @Override
   public boolean isValidAt(Calendar time) {
     return periods.contains(time);
+  }
+  
+  public RangeSet<Calendar> getValidPeriods() {
+    return periods;
   }
 
   private void writeObject(ObjectOutputStream out) throws IOException {

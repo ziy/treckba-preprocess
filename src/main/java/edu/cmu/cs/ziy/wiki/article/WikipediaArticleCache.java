@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Calendar;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -15,6 +16,9 @@ import org.wikipedia.Wiki;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Range;
 import com.google.common.collect.Table;
+
+import edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaEntityExpander;
+import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
 
 public class WikipediaArticleCache {
 
@@ -47,24 +51,28 @@ public class WikipediaArticleCache {
 
   public static WikipediaArticle loadArticle(String title, Range<Calendar> period, Wiki wiki)
           throws IOException {
+    WikipediaArticle article;
     if (articleCache.contains(title, period)) {
-      return articleCache.get(title, period);
+      article = articleCache.get(title, period);
+    } else {
+      article = WikipediaArticle.newPeriodicalArticle(title, period.upperEndpoint(),
+              period.lowerEndpoint(), wiki);
+      articleCache.put(title, period, article);
     }
-    WikipediaArticle article = WikipediaArticle.newPeriodicalArticle(title, period.upperEndpoint(),
-            period.lowerEndpoint(), wiki);
-    articleCache.put(title, period, article);
     return article;
   }
 
   // TODO Need to include expanded keyterms
   public static ExpandedWikipediaArticle loadExpandedArticle(String title, Range<Calendar> period,
-          Wiki wiki) throws IOException {
+          WikipediaEntityExpander[] expanders, Wiki wiki) throws IOException {
+    ExpandedWikipediaArticle expandedArticle;
     if (expandedArticleCache.contains(title, period)) {
-      return expandedArticleCache.get(title, period);
+      expandedArticle = expandedArticleCache.get(title, period);
+    } else {
+      expandedArticle = ExpandedWikipediaArticle.newPeriodicalArticle(title,
+              period.upperEndpoint(), period.lowerEndpoint(), wiki);
+      expandedArticleCache.put(title, period, expandedArticle);
     }
-    ExpandedWikipediaArticle expandedArticle = ExpandedWikipediaArticle.newPeriodicalArticle(title,
-            period.upperEndpoint(), period.lowerEndpoint(), wiki);
-    expandedArticleCache.put(title, period, expandedArticle);
     return expandedArticle;
   }
 }
