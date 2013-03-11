@@ -2339,7 +2339,7 @@ public class Wiki implements Serializable {
 
       // parse stuff
       while (line.contains("<rev ")) {
-        int a = line.indexOf("<rev");
+        int a = line.indexOf("<rev ");
         int b = line.indexOf("/>", a);
         revisions.add(parseRevision(line.substring(a, b), title));
         line = line.substring(b);

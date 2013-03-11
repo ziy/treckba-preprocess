@@ -1,5 +1,6 @@
 package edu.cmu.cs.ziy.wiki.article;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -25,10 +26,10 @@ public class WikipediaArticleCache {
   private static Table<String, Range<Calendar>, ExpandedWikipediaArticle> expandedArticleCache;
 
   @SuppressWarnings("unchecked")
-  public static void loadCache(String inputFilePath) throws IOException, ClassNotFoundException {
+  public static void loadCache(File cacheFilePath) throws IOException, ClassNotFoundException {
     try {
       ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new FileInputStream(
-              inputFilePath)));
+              cacheFilePath)));
       articleCache = (Table<String, Range<Calendar>, WikipediaArticle>) ois.readObject();
       expandedArticleCache = (Table<String, Range<Calendar>, ExpandedWikipediaArticle>) ois
               .readObject();
@@ -39,9 +40,9 @@ public class WikipediaArticleCache {
     }
   }
 
-  public static void writeCache(String outputFilePath) throws IOException {
+  public static void writeCache(File cacheFilePath) throws IOException {
     ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(
-            outputFilePath)));
+            cacheFilePath)));
     oos.writeObject(articleCache);
     oos.writeObject(expandedArticleCache);
     oos.close();
