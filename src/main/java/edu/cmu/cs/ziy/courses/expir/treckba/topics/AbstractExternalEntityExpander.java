@@ -27,7 +27,7 @@ public abstract class AbstractExternalEntityExpander extends AbstractWikipediaEn
           Range<Calendar> period, Wiki wiki) throws IOException {
     RangeSet<Calendar> periods = TreeRangeSet.create();
     WikipediaArticle article = WikipediaArticleCache.loadArticle(expandedEntity, period, wiki);
-    for (Entry<Range<Calendar>, String> revision : article.getPeriodicContentEntrySet()) {
+    for (Entry<Range<Calendar>, String> revision : article.getPeriodicContentPairs()) {
       if (containsLink(revision.getValue(), originalEntity)) {
         periods.add(Range.closedOpen(revision.getKey().lowerEndpoint(), revision.getKey()
                 .upperEndpoint()));

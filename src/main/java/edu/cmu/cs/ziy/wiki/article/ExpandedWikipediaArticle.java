@@ -92,7 +92,7 @@ public class ExpandedWikipediaArticle extends WikipediaArticle implements Serial
   }
 
   public String getSizeSummary() {
-    return entity + "\t" + period2value.asMapOfRanges().size() + "\t"
+    return entity + "\t" + size() + "\t"
             + getRelatedEntities(WikipediaEntity.Relation.CATEGORY).size() + "\t"
             + getRelatedEntities(WikipediaEntity.Relation.OUTLINK).size() + "\t"
             + getRelatedEntities(WikipediaEntity.Relation.REDIRECT).size() + "\t"

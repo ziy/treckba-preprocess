@@ -4,8 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.wikipedia.Wiki;
 import org.wikipedia.Wiki.Revision;
@@ -55,20 +53,12 @@ public class WikipediaArticle extends DefaultPeriodicallyChangedObject<String> i
   }
 
   public void addPeriodicContent(Range<Calendar> period, String content) {
-    period2value.put(period, content);
+    addValuePeriod(period, content);
     entity.addValidPeriod(period);
   }
 
   public WikipediaEntity getEntity() {
     return entity;
-  }
-
-  public RangeMap<Calendar, String> getPeriodicContentMap() {
-    return period2value;
-  }
-
-  public Set<Entry<Range<Calendar>, String>> getPeriodicContentEntrySet() {
-    return period2value.asMapOfRanges().entrySet();
   }
 
   @Override

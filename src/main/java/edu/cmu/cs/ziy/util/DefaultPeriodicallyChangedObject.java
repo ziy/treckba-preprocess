@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import com.google.common.collect.Range;
@@ -17,7 +18,7 @@ public class DefaultPeriodicallyChangedObject<T extends Serializable> implements
 
   private static final long serialVersionUID = 1L;
 
-  protected RangeMap<Calendar, T> period2value;
+  private RangeMap<Calendar, T> period2value;
 
   public DefaultPeriodicallyChangedObject() {
     super();
@@ -37,6 +38,16 @@ public class DefaultPeriodicallyChangedObject<T extends Serializable> implements
   @Override
   public T getValueAt(Calendar time) {
     return period2value.get(time);
+  }
+
+  @Override
+  public Set<Entry<Range<Calendar>, T>> getPeriodicContentPairs() {
+    return period2value.asMapOfRanges().entrySet();
+  }
+  
+  @Override
+  public int size() {
+    return period2value.asMapOfRanges().size();
   }
 
   private void writeObject(ObjectOutputStream out) throws IOException {
