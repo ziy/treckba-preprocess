@@ -13,7 +13,6 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.Sets;
 
-import edu.cmu.cs.ziy.util.CalendarUtils;
 import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
 
 public class ExpandedWikipediaArticle extends WikipediaArticle implements Serializable {
@@ -41,7 +40,7 @@ public class ExpandedWikipediaArticle extends WikipediaArticle implements Serial
   public static ExpandedWikipediaArticle newPeriodicalArticle(String title, Calendar latest,
           Calendar earliest, Wiki wiki) throws IOException {
     ExpandedWikipediaArticle article = new ExpandedWikipediaArticle(title);
-    Calendar endTime = CalendarUtils.PRESENT;
+    Calendar endTime = latest;
     for (Revision revision : wiki.getPageHistoryWithInitialVersion(title, latest, earliest)) {
       article.addPeriodicContent(Range.closedOpen(revision.getTimestamp(), endTime),
               revision.getText());

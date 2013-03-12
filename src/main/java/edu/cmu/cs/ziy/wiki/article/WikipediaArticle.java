@@ -11,7 +11,6 @@ import org.wikipedia.Wiki.Revision;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 
-import edu.cmu.cs.ziy.util.CalendarUtils;
 import edu.cmu.cs.ziy.util.DefaultPeriodicallyChangedObject;
 import edu.cmu.cs.ziy.util.GuavaUtils;
 import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
@@ -38,14 +37,14 @@ public class WikipediaArticle extends DefaultPeriodicallyChangedObject<String> i
   public static WikipediaArticle newPeriodicalArticle(String title, Calendar latest,
           Calendar earliest, Wiki wiki) throws IOException {
     WikipediaArticle article = new WikipediaArticle(title);
-    Calendar endTime = CalendarUtils.PRESENT;
+    Calendar endTime = latest;
     for (Revision revision : wiki.getPageHistoryWithInitialVersion(title, latest, earliest)) {
       // http://en.wikipedia.org/w/index.php?maxlag=5&title=Israel+and+the+apartheid+analogy&oldid=462866082&action=raw
       try {
         String text = revision.getText();
         article.addPeriodicContent(Range.closedOpen(revision.getTimestamp(), endTime), text);
       } catch (FileNotFoundException e) {
-        System.err.println(e.getMessage());
+        System.err.println("Deleted revision:" + e.getMessage());
       }
       endTime = revision.getTimestamp();
     }
