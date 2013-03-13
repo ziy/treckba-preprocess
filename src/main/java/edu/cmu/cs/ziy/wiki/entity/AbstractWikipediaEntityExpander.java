@@ -1,4 +1,4 @@
-package edu.cmu.cs.ziy.courses.expir.treckba.topics;
+package edu.cmu.cs.ziy.wiki.entity;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -13,13 +13,13 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.Sets;
 
-import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
-
 public abstract class AbstractWikipediaEntityExpander implements WikipediaEntityExpander {
 
+  private static String WIKI_ENTITY_PATTERN = "\\[{2}%s(?:\\]{2}|\\|)";
+
   @Override
-  public abstract Set<WikipediaEntity> generateEntities(String originalEntity, Wiki wiki)
-          throws IOException;
+  public abstract Set<WikipediaEntity> generateEntities(String originalEntity,
+          Range<Calendar> period, Wiki wiki) throws IOException;
 
   @Override
   public abstract RangeSet<Calendar> validateExistence(String originalEntity,
@@ -28,7 +28,7 @@ public abstract class AbstractWikipediaEntityExpander implements WikipediaEntity
   @Override
   public Set<WikipediaEntity> generateAndValidateExistence(String originalEntity,
           Range<Calendar> period, Wiki wiki) throws IOException {
-    Set<WikipediaEntity> entities = generateEntities(originalEntity, wiki);
+    Set<WikipediaEntity> entities = generateEntities(originalEntity, period, wiki);
     for (WikipediaEntity entity : entities) {
       RangeSet<Calendar> periods = validateExistence(originalEntity, entity.getText(), period, wiki);
       entity.addValidPeriods(periods);
@@ -44,8 +44,8 @@ public abstract class AbstractWikipediaEntityExpander implements WikipediaEntity
   }
 
   protected boolean containsLink(String contentText, String expandedEntity) {
-    String regex = "\\[{2}" + Pattern.quote(expandedEntity) + "(?:\\]{2}|\\|)";
-    return Pattern.compile(regex).matcher(contentText).find();
+    Pattern pattern = Pattern.compile(String.format(WIKI_ENTITY_PATTERN, Pattern.quote(expandedEntity)));
+    return pattern.matcher(contentText).find();
   }
 
 }

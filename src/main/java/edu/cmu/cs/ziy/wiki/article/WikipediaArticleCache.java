@@ -17,7 +17,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Range;
 import com.google.common.collect.Table;
 
-import edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaEntityExpander;
+import edu.cmu.cs.ziy.wiki.entity.WikipediaEntityExpander;
 
 public class WikipediaArticleCache {
 

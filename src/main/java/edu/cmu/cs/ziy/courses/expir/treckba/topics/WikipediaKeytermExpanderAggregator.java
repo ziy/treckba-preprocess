@@ -1,23 +1,36 @@
 package edu.cmu.cs.ziy.courses.expir.treckba.topics;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.FailedLoginException;
 
 import org.wikipedia.Wiki;
 
 import com.google.common.collect.Range;
+import com.google.common.io.Files;
 
 import edu.cmu.cs.ziy.util.CalendarUtils;
 import edu.cmu.cs.ziy.wiki.article.ExpandedWikipediaArticle;
 import edu.cmu.cs.ziy.wiki.article.WikipediaArticleCache;
+import edu.cmu.cs.ziy.wiki.entity.BoldTextExpander;
+import edu.cmu.cs.ziy.wiki.entity.CategoryNameExpander;
+import edu.cmu.cs.ziy.wiki.entity.InlinkAnchorTextExpander;
+import edu.cmu.cs.ziy.wiki.entity.InlinkTitleExpander;
+import edu.cmu.cs.ziy.wiki.entity.OutlinkAnchorTextExpander;
+import edu.cmu.cs.ziy.wiki.entity.OutlinkTitleExpander;
+import edu.cmu.cs.ziy.wiki.entity.RedirectExpander;
 import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
+import edu.cmu.cs.ziy.wiki.entity.WikipediaEntityExpander;
 
 public class WikipediaKeytermExpanderAggregator {
 
@@ -41,8 +54,9 @@ public class WikipediaKeytermExpanderAggregator {
     if (!cacheDir.exists()) {
       cacheDir.mkdir();
     }
-    this.expanders = new WikipediaEntityExpander[] { new CategoryEntityExpander(),
-        new OutlinkEntityExpander(), new InlinkEntityExpander(), new RedirectEntityExpander() };
+    this.expanders = new WikipediaEntityExpander[] { new CategoryNameExpander(),
+        new OutlinkTitleExpander(), new InlinkTitleExpander(), new RedirectExpander(),
+        new OutlinkAnchorTextExpander(), new InlinkAnchorTextExpander(), new BoldTextExpander() };
   }
 
   public ExpandedWikipediaArticle expandKeyterm(String urlname) throws IOException, ParseException,
@@ -53,6 +67,7 @@ public class WikipediaKeytermExpanderAggregator {
     ExpandedWikipediaArticle article = WikipediaArticleCache.loadExpandedArticle(title, period,
             expanders, wiki);
 
+    article.clearRelatedEntities();
     for (WikipediaEntityExpander expander : expanders) {
       Set<WikipediaEntity> relatedEntities = expander.generateAndValidateExistence(title, period,
               wiki);
@@ -61,32 +76,55 @@ public class WikipediaKeytermExpanderAggregator {
 
     WikipediaArticleCache.writeCache(cacheFilePath);
     System.out.println(article.getSizeSummary());
-    System.out.println(article.getRelatedEntities());
 
     return article;
   }
 
   public static void main(String[] args) throws IOException, FailedLoginException, ParseException,
           ClassNotFoundException {
-    // Logger.getLogger("wiki").setLevel(Level.SEVERE);
+    Logger.getLogger("wiki").setLevel(Level.SEVERE);
     String domain = "en.wikipedia.org";
     int throttle = 5000;
     String earliestTimeStr = "2011-10-07-14";
     String latestTimeStr = "2012-05-02-00";
     String dateFormatPattern = "yyyy-MM-dd-HH";
-    String cacheDirPath = "src/main/resources/keyterm-cache/";
+    String cacheDirPath = "keyterm-cache/";
+    String keytermFile = "src/main/resources/expanded-keyterms.tsv";
 
-    // String topicName = "William_D._Cohan";
+    BufferedWriter writer = Files.newWriter(new File(keytermFile), Charset.defaultCharset());
     WikipediaKeytermExpanderAggregator wke = new WikipediaKeytermExpanderAggregator(domain,
             throttle, earliestTimeStr, latestTimeStr, dateFormatPattern, cacheDirPath);
-    // wke.expandKeyterm(topicName);
+
+/*// @formatter:off
+    String topicName = "William_D._Cohan";
+    ExpandedWikipediaArticle keyterms = wke.expandKeyterm(topicName);
+    for (WikipediaEntity entity : keyterms.getRelatedEntities()) {
+      writer.write(entity.getText() + "\t" + keyterms.getEntity().getText() + "\t"
+              + entity.getRelation() + "\t"
+              + CalendarUtils.rangeSetToString(entity.getValidPeriods(), CalendarUtils.YMDH_FORMAT)
+              + "\n");
+    }
+*/// @formatter:on
 
     String jsonPath = "data/trec-kba-ccr-2012-scorer-and-full-annotation/trec-kba-ccr-2012.filter-topics.json";
     BufferedReader jsonReader = new BufferedReader(new FileReader(jsonPath));
     TrecKbaTopics topics = TrecKbaTopics.readTrecKbaTopics(jsonReader);
     jsonReader.close();
     for (String topicName : topics.getTopicNames()) {
-      wke.expandKeyterm(topicName);
+      ExpandedWikipediaArticle keyterms = wke.expandKeyterm(topicName);
+      for (WikipediaEntity entity : keyterms.getRelatedEntities()) {
+        writer.write(entity.getText()
+                + "\t"
+                + keyterms.getEntity().getText()
+                + "\t"
+                + entity.getRelation()
+                + "\t"
+                + CalendarUtils.rangeSetToString(entity.getValidPeriods(),
+                        CalendarUtils.YMDH_FORMAT) + "\n");
+      }
     }
+
+    writer.close();
+
   }
 }

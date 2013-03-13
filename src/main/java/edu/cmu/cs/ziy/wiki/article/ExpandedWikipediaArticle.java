@@ -57,6 +57,10 @@ public class ExpandedWikipediaArticle extends WikipediaArticle implements Serial
     relatedEntities.addAll(entities);
   }
 
+  public void clearRelatedEntities() {
+    relatedEntities.clear();
+  }
+
   public Set<WikipediaEntity> getRelatedEntities(WikipediaEntity.Relation relation) {
     return Sets.filter(relatedEntities, new WikipediaEntity.RelationPredicate(relation));
   }
@@ -95,7 +99,10 @@ public class ExpandedWikipediaArticle extends WikipediaArticle implements Serial
             + getRelatedEntities(WikipediaEntity.Relation.CATEGORY).size() + "\t"
             + getRelatedEntities(WikipediaEntity.Relation.OUTLINK).size() + "\t"
             + getRelatedEntities(WikipediaEntity.Relation.REDIRECT).size() + "\t"
-            + getRelatedEntities(WikipediaEntity.Relation.INLINK).size();
+            + getRelatedEntities(WikipediaEntity.Relation.INLINK).size() + "\t"
+            + getRelatedEntities(WikipediaEntity.Relation.OUTLINK_ANCHOR).size() + "\t"
+            + getRelatedEntities(WikipediaEntity.Relation.INLINK_ANCHOR).size() + "\t"
+            + getRelatedEntities(WikipediaEntity.Relation.BOLDTEXT).size() + "\t";
   }
 
 }

@@ -1,9 +1,9 @@
-package edu.cmu.cs.ziy.courses.expir.treckba.topics;
+package edu.cmu.cs.ziy.wiki.entity;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.wikipedia.Wiki;
 
@@ -13,22 +13,21 @@ import com.google.common.collect.TreeRangeSet;
 
 import edu.cmu.cs.ziy.wiki.article.WikipediaArticle;
 import edu.cmu.cs.ziy.wiki.article.WikipediaArticleCache;
-import edu.cmu.cs.ziy.wiki.entity.WikipediaEntity;
 
-public abstract class AbstractInternalEntityExpander extends AbstractWikipediaEntityExpander
+public abstract class AbstractExternalEntityExpander extends AbstractWikipediaEntityExpander
         implements WikipediaEntityExpander {
 
   @Override
-  public abstract Set<WikipediaEntity> generateEntities(String originalEntity, Wiki wiki)
-          throws IOException;
+  public abstract Set<WikipediaEntity> generateEntities(String originalEntity,
+          Range<Calendar> period, Wiki wiki) throws IOException;
 
   @Override
   public RangeSet<Calendar> validateExistence(String originalEntity, String expandedEntity,
           Range<Calendar> period, Wiki wiki) throws IOException {
     RangeSet<Calendar> periods = TreeRangeSet.create();
-    WikipediaArticle article = WikipediaArticleCache.loadArticle(originalEntity, period, wiki);
+    WikipediaArticle article = WikipediaArticleCache.loadArticle(expandedEntity, period, wiki);
     for (Entry<Range<Calendar>, String> revision : article.getPeriodicContentPairs()) {
-      if (containsLink(revision.getValue(), expandedEntity)) {
+      if (containsLink(revision.getValue(), originalEntity)) {
         periods.add(Range.closedOpen(revision.getKey().lowerEndpoint(), revision.getKey()
                 .upperEndpoint()));
       }

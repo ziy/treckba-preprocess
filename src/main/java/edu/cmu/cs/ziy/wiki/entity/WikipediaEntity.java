@@ -19,7 +19,7 @@ public class WikipediaEntity extends DefaultPeriodicallyValidObject implements S
   // DONE Category them into two super classes: REDIRECT, INLINK -> External, CATEGORY, OUTLINK,
   // BOLD TEXT -> Internal
   public static enum Relation {
-    ORIGINAL, REDIRECT, CATEGORY, INLINK, OUTLINK
+    ORIGINAL, REDIRECT, CATEGORY, INLINK, OUTLINK, INLINK_ANCHOR, OUTLINK_ANCHOR, BOLDTEXT
   };
 
   protected String text;
