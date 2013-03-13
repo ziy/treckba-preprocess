@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/treckba-preprocess/src/main/java/edu/cmu/cs/ziy/courses/expir/treckba/topics/WikipediaKeytermExpanderAggregator.java"/>
+<listEntry value="/treckba-corpus"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="1"/>
+<listEntry value="4"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="edu.cmu.cs.ziy.courses.expir.treckba.topics.WikipediaKeytermExpanderAggregator"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="treckba-preprocess"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="treckba-corpus"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Xmx4g"/>
 </launchConfiguration>
