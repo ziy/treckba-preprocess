@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Calendar;
-import java.util.Set;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +17,7 @@ import javax.security.auth.login.FailedLoginException;
 import org.wikipedia.Wiki;
 
 import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
 import edu.cmu.cs.ziy.util.CalendarUtils;
@@ -67,14 +68,16 @@ public class WikipediaKeytermExpanderAggregator {
     ExpandedWikipediaArticle article = WikipediaArticleCache.loadExpandedArticle(title, period,
             expanders, wiki);
 
+/*// @formatter:off
     article.clearRelatedEntities();
     for (WikipediaEntityExpander expander : expanders) {
       Set<WikipediaEntity> relatedEntities = expander.generateAndValidateExistence(title, period,
               wiki);
       article.addRelatedEntities(relatedEntities);
     }
-
     WikipediaArticleCache.writeCache(cacheFilePath);
+    
+ */// @formatter:on
     System.out.println(article.getSizeSummary());
 
     return article;
@@ -111,11 +114,13 @@ public class WikipediaKeytermExpanderAggregator {
     TrecKbaTopics topics = TrecKbaTopics.readTrecKbaTopics(jsonReader);
     jsonReader.close();
     for (String topicName : topics.getTopicNames()) {
-      ExpandedWikipediaArticle keyterms = wke.expandKeyterm(topicName);
-      for (WikipediaEntity entity : keyterms.getRelatedEntities()) {
-        writer.write(entity.getText()
+      ExpandedWikipediaArticle keyterm = wke.expandKeyterm(topicName);
+      HashSet<WikipediaEntity> allEntities = Sets.newHashSet(keyterm.getRelatedEntities());
+      allEntities.add(keyterm.getEntity());
+      for (WikipediaEntity entity : allEntities) {
+        writer.write(entity.getText().replaceAll("\\s+", " ")
                 + "\t"
-                + keyterms.getEntity().getText()
+                + keyterm.getEntity().getText()
                 + "\t"
                 + entity.getRelation()
                 + "\t"
